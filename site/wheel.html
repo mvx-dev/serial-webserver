@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Responsive Steering Wheel Screen</title>
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: #111;
+                font-family: monospace;
+                color: white;
+                height: 100%;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .screen-container {
+                width: 100vw;
+                height: 100vh;
+                padding: 4vw;
+                box-sizing: border-box;
+            }
+
+            .screen {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 2vw;
+                background: #1e1e1e;
+                border: 0.5vw solid #888;
+                border-radius: 1vw;
+                height: 100%;
+                width: 100%;
+                box-sizing: border-box;
+                padding: 2vw;
+            }
+
+            .section {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5vw;
+                justify-content: center;
+            }
+
+            .box {
+                border: 0.3vw solid #aaa;
+                background-color: #2a2a2a;
+                border-radius: 0.5vw;
+                padding: 1vw;
+                box-sizing: border-box;
+            }
+
+            .center-box {
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                gap: 2vw;
+                justify-content: center;
+            }
+
+            .gear {
+                font-size: 10vw;
+                font-weight: bold;
+                color: #eee;
+                padding: 10px 0;
+            }
+
+            .value {
+                font-size: 4vw;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .label {
+                font-size: 2.5vw;
+                color: #aaa;
+                text-align: center;
+            }
+
+            .value-with-indicator {
+                position: relative;
+                display: flex;
+                justify-content: center; /* center the value */
+                align-items: center;
+                font-size: 4vw;
+                font-weight: bold;
+            }
+
+            .indicator {
+                position: absolute;
+                right: 0.6vw;
+                font-size: 4vw;
+                transition: color 0.3s;
+                pointer-events: none;
+            }
+
+            /* Color variants */
+            .indicator.up {
+                color: #00ff88;
+            }
+            .indicator.down {
+                color: #ff4d4d;
+            }
+            .indicator.left {
+                color: #0088ff;
+            }
+            .indicator.right {
+                color: #8800ff;
+            }
+            .indicator.plus {
+                color: #00ff88;
+            }
+            .indicator.minus {
+                color: #ff4d4d;
+            }
+            .indicator.neutral {
+                color: #aaa;
+            }
+
+            @media (max-width: 600px) {
+                .value {
+                    font-size: 6vw;
+                }
+
+                .label {
+                    font-size: 3.5vw;
+                }
+
+                .gear {
+                    font-size: 12vw;
+                }
+
+                .box {
+                    padding: 2vw;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="screen-container">
+            <div class="screen">
+                <!-- Left Side -->
+                <div class="section">
+                    <div class="box">
+                        <div class="label">FORWARD</div>
+                        <div class="value-with-indicator">
+                            <span id="forward-value">58.5</span>
+                            <span id="forward-indicator" class="indicator"
+                                >-</span
+                            >
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="label">SIDE</div>
+                        <div class="value-with-indicator">
+                            <span id="side-value">58.5</span>
+                            <span id="side-indicator" class="indicator">-</span>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="label">VERTICAL</div>
+                        <div class="value-with-indicator">
+                            <span id="vertical-value">58.5</span>
+                            <span id="vertical-indicator" class="indicator"
+                                >-</span
+                            >
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="label">TOTAL</div>
+                        <div class="value-with-indicator">
+                            <span id="total-value">58.5</span>
+                            <span id="total-indicator" class="indicator"
+                                >-</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center -->
+                <div class="section center-box">
+                    <div class="box">
+                        <div class="label">SPEED DELTA</div>
+                        <div class="value-with-indicator">
+                            <span id="delta-value">58.5</span>
+                            <span id="delta-indicator" class="indicator"
+                                >-</span
+                            >
+                        </div>
+                        <div class="label">KPH</div>
+                    </div>
+                    <div class="box">
+                        <div class="label">SPEED</div>
+                        <div class="gear" id="speed">N</div>
+                        <div class="label">KPH</div>
+                    </div>
+                </div>
+
+                <!-- Right Side -->
+                <div class="section">
+                    <div class="box">
+                        <div class="label">YAW</div>
+                        <div class="value-with-indicator">
+                            <span id="yaw-value">58.5</span>
+                            <span id="yaw-indicator" class="indicator">-</span>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="label">PITCH</div>
+                        <div class="value-with-indicator">
+                            <span id="pitch-value">58.5</span>
+                            <span id="pitch-indicator" class="indicator"
+                                >-</span
+                            >
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="label">ROLL</div>
+                        <div class="value-with-indicator">
+                            <span id="roll-value">58.5</span>
+                            <span id="roll-indicator" class="indicator">-</span>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="label">TIME</div>
+                        <div class="value" id="time">-31.06</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function updateLR(id, value) {
+                const indicator = document.getElementById(`${id}-indicator`);
+                if (value > 0.15) {
+                    indicator.textContent = "R";
+                    indicator.className = "indicator right";
+                } else if (value < -0.15) {
+                    indicator.textContent = "L";
+                    indicator.className = "indicator left";
+                } else {
+                    indicator.textContent = "-";
+                    indicator.className = "indicator neutral";
+                }
+            }
+
+            function updatePitch(id, value) {
+                const indicator = document.getElementById(`${id}-indicator`);
+                if (value > 0.15) {
+                    indicator.textContent = "U";
+                    indicator.className = "indicator up";
+                } else if (value < -0.15) {
+                    indicator.textContent = "D";
+                    indicator.className = "indicator down";
+                } else {
+                    indicator.textContent = "-";
+                    indicator.className = "indicator neutral";
+                }
+            }
+
+            function updateAccel(id, value) {
+                const indicator = document.getElementById(`${id}-indicator`);
+                if (value > 0.15) {
+                    indicator.textContent = "+";
+                    indicator.className = "indicator plus";
+                } else if (value < -0.15) {
+                    indicator.textContent = "-";
+                    indicator.className = "indicator minus";
+                } else {
+                    indicator.textContent = "";
+                    indicator.className = "indicator neutral";
+                }
+            }
+
+            function updateScreen(data) {
+                document.getElementById("speed").textContent = Math.abs(
+                    data.speed,
+                );
+                document.getElementById("time").textContent = data.time;
+                document.getElementById("forward-value").textContent = Math.abs(
+                    data.forward.toFixed(2),
+                );
+                document.getElementById("side-value").textContent = Math.abs(
+                    data.side.toFixed(2),
+                );
+                document.getElementById("vertical-value").textContent =
+                    Math.abs(data.vertical.toFixed(2));
+                document.getElementById("total-value").textContent = Math.abs(
+                    data.total.toFixed(2),
+                );
+                document.getElementById("delta-value").textContent = Math.abs(
+                    data.delta.toFixed(2),
+                );
+                document.getElementById("yaw-value").textContent = Math.abs(
+                    data.yaw.toFixed(2),
+                );
+                document.getElementById("pitch-value").textContent = Math.abs(
+                    data.pitch.toFixed(2),
+                );
+                document.getElementById("roll-value").textContent = Math.abs(
+                    data.roll.toFixed(2),
+                );
+
+                updateLR("yaw", data.yaw);
+                updateLR("roll", data.roll);
+                updatePitch("pitch", data.pitch);
+                updateAccel("forward", data.forward);
+                updateAccel("side", data.side);
+                updateAccel("vertical", data.vertical);
+                updateAccel("total", data.total);
+                updateAccel("delta", data.delta);
+            }
+
+            function parse(value) {
+                return parseFloat(value);
+            }
+
+            // const eventSource = new EventSource("/events-streaming");
+            // const data = new Array();
+
+            // eventSource.onmessage = function (event) {
+            //    data = String(event.data).split(",").map(parse);
+            //    updateScreen({
+            //        forward: data[0],
+            //        side: data[1],
+            //        vertical: data[2],
+            //        total: data[3],
+            //        delta: data[4],
+            //        speed: data[5],
+            //        yaw: data[6],
+            //        pitch: data[7],
+            //        roll: data[8],
+            //        time: data[9],
+            //    });
+            //};
+
+            // Example update
+            updateScreen({
+                forward: 0.1,
+                side: 0.43,
+                vertical: -0.43,
+                total: 0.63,
+                delta: 0.05,
+                speed: 23.5,
+                yaw: 0.34,
+                pitch: -0.06,
+                roll: -0.22,
+                time: "01:45",
+            });
+        </script>
+    </body>
+</html>
