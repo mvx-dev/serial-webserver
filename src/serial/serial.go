@@ -1,4 +1,4 @@
-package main
+package serial
 
 import (
 	"encoding/csv"
@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	format      = "2006-01-02T15:04:05"
-	serial_port = "/dev/ttyACM0"
-	baud_rate   = 9600
-	sample_rate = 50
+	format        = "2006-01-02T15:04:05"
+	serial_port   = "/dev/ttyACM0"
+	baud_rate     = 9600
+	sample_rate   = 50
+	max_retention = 16
 )
 
 type SerialState struct {
@@ -126,11 +127,11 @@ func (serialState *SerialState) SerialService() {
 				serialState.rot_data[len(serialState.rot_data)-1])
 		}
 
-		if len(serialState.accel_data) > 16 {
+		if len(serialState.accel_data) > max_retention {
 			serialState.accel_data = removeAccel(serialState.accel_data)
 		}
 
-		if len(serialState.rot_data) > 16 {
+		if len(serialState.rot_data) > max_retention {
 			serialState.rot_data = removeRot(serialState.rot_data)
 		}
 	}
