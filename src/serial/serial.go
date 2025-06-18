@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -14,25 +15,30 @@ import (
 )
 
 const (
-	format        = "2006-01-02T15:04:05"
-	serial_port   = "/dev/ttyACM0"
-	baud_rate     = 9600
-	sample_rate   = 50
-	max_retention = 16
+	Format         = "2006-01-02T15:04:05"
+	Default_serial = "/dev/ttyACM0"
+	baud_rate      = 9600
+	sample_rate    = 50
+	max_retention  = int(1000 / sample_rate) // This is to ensure the delta speed is delayed by a second
 )
 
 type SerialState struct {
-	logger     zerolog.Logger
-	logfile    os.File
-	serialPort *serial.Port
-	accel_data []Accel3D
-	rot_data   []Rot3D
+	logger        zerolog.Logger
+	logfile       os.File
+	serialPort    *serial.Port
+	accel_data    []Accel3D
+	rot_data      []Rot3D
+	rolling_speed float64
+	rolling_delta float64
+	start_time    time.Time
+	Channel       chan []float64
 }
 
 type Accel3D struct {
 	X float64
 	Y float64
 	Z float64
+	T int64
 }
 
 type Rot3D struct {
@@ -41,9 +47,9 @@ type Rot3D struct {
 	Z float64
 }
 
-func newState() (*SerialState, error) {
+func NewState(serial_port string) (*SerialState, error) {
 	// Configure logging
-	filename := fmt.Sprintf("interface-log-%s.json", time.Now().Format(format))
+	filename := fmt.Sprintf("interface-log-%s.json", time.Now().Format(Format))
 	logfile, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 	if err != nil {
 		fmt.Println("Unable to open log file. Exiting.")
@@ -69,11 +75,15 @@ func newState() (*SerialState, error) {
 	rot_data := make([]Rot3D, 0)
 
 	return &SerialState{
-		logger:     logger,
-		logfile:    *logfile,
-		serialPort: stream,
-		accel_data: accel_data,
-		rot_data:   rot_data,
+		logger:        logger,
+		logfile:       *logfile,
+		serialPort:    stream,
+		accel_data:    accel_data,
+		rot_data:      rot_data,
+		rolling_speed: 0,
+		rolling_delta: 0,
+		start_time:    time.Now(),
+		Channel:       make(chan []float64),
 	}, nil
 }
 
@@ -108,7 +118,8 @@ func (serialState *SerialState) SerialService() {
 				break
 			}
 
-			tmp_accel, err := newAccel3D(data[:3])
+			delta_t := time.Since(serialState.start_time)
+			tmp_accel, err := newAccel3D(append(data[:3], strconv.Itoa(int(delta_t))))
 			if err != nil {
 				serialState.logger.Err(err)
 			}
@@ -119,6 +130,9 @@ func (serialState *SerialState) SerialService() {
 				serialState.logger.Err(err)
 			}
 			serialState.rot_data = append(serialState.rot_data, *tmp_rot)
+
+			serialState.rolling_speed += tmp_accel.GetSpeed()
+			serialState.rolling_delta = serialState.rolling_speed - serialState.accel_data[0].GetSpeed()
 		}
 
 		if len(serialState.accel_data) != 0 && len(serialState.rot_data) != 0 {
@@ -134,7 +148,24 @@ func (serialState *SerialState) SerialService() {
 		if len(serialState.rot_data) > max_retention {
 			serialState.rot_data = removeRot(serialState.rot_data)
 		}
+
+		serialState.Channel <- serialState.Format()
 	}
+}
+
+func (serialState *SerialState) Format() []float64 {
+	values := make([]float64, 0)
+	accel := serialState.accel_data[len(serialState.accel_data)-1]
+	rot := serialState.rot_data[len(serialState.rot_data)-1]
+
+	values = append(values, accel.ToArray()...)        // Raw acceleration
+	values = append(values, accel.Abs())               // Total acceleration
+	values = append(values, serialState.rolling_delta) // Speed delta
+	values = append(values, serialState.rolling_speed) // Absolute speed
+	values = append(values, rot.ToArray()...)          // Raw rotation
+	values = append(values, float64(time.Since(serialState.start_time)))
+
+	return values
 }
 
 func (a *Accel3D) Print() {
@@ -151,6 +182,22 @@ func (a *Accel3D) String() string {
 
 func (r *Rot3D) String() string {
 	return fmt.Sprintf("%f,%f,%f", r.X, r.Y, r.Z)
+}
+
+func (a *Accel3D) ToArray() []float64 {
+	return []float64{a.X, a.Y, a.Z}
+}
+
+func (r *Rot3D) ToArray() []float64 {
+	return []float64{r.X, r.Y, r.Z}
+}
+
+func (a *Accel3D) Abs() float64 {
+	return math.Sqrt(math.Pow(a.X, 2) + math.Pow(a.Y, 2) + math.Pow(a.Z, 2))
+}
+
+func (a *Accel3D) GetSpeed() float64 {
+	return a.Abs() * float64(a.T)
 }
 
 func newAccel3D(data []string) (*Accel3D, error) {
@@ -249,7 +296,7 @@ func removeRot(slice []Rot3D) []Rot3D {
 }
 
 func main() {
-	serialState, err := newState()
+	serialState, err := NewState(Default_serial)
 	if err != nil {
 		fmt.Printf("Failed to initialize state. Error: %s\n", err)
 	}
