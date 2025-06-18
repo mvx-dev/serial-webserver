@@ -236,10 +236,10 @@
         <script>
             function updateLR(id, value) {
                 const indicator = document.getElementById(`${id}-indicator`);
-                if (value > 0.15) {
+                if (value > 1) {
                     indicator.textContent = "R";
                     indicator.className = "indicator right";
-                } else if (value < -0.15) {
+                } else if (value < -1) {
                     indicator.textContent = "L";
                     indicator.className = "indicator left";
                 } else {
@@ -250,10 +250,10 @@
 
             function updatePitch(id, value) {
                 const indicator = document.getElementById(`${id}-indicator`);
-                if (value > 0.15) {
+                if (value > 1) {
                     indicator.textContent = "U";
                     indicator.className = "indicator up";
-                } else if (value < -0.15) {
+                } else if (value < -1) {
                     indicator.textContent = "D";
                     indicator.className = "indicator down";
                 } else {
@@ -319,15 +319,9 @@
                 return parseFloat(value);
             }
 
-            console.log("fuck you");
-            const eventSource = new EventSource("/events-streaming");
-            console.log("and again");
-            const data = new Array();
-            console.log("one more time");
-
-            eventSource.onmessage = function (event) {
-                console.log("bastard");
-                data = event.data.split(",");
+            const http = new XMLHttpRequest();
+            http.onload = () => {
+                data = http.responseText.split(",");
                 updateScreen({
                     forward: parseFloat(data[0]),
                     side: parseFloat(data[1]),
@@ -335,30 +329,16 @@
                     total: parseFloat(data[3]),
                     delta: parseFloat(data[4]),
                     speed: parseFloat(data[5]),
-                    yaw: parseFloat(data[6]),
+                    yaw: -parseFloat(data[8]),
                     pitch: parseFloat(data[7]),
-                    roll: parseFloat(data[8]),
+                    roll: parseFloat(data[6]),
                     time: 0,
                 });
             };
-
-            eventSource.onerror = function () {
-                console.log("Error: connection closed or failed");
-            };
-
-            // Example update
-            // updateScreen({
-            //     forward: 0.1,
-            //     side: 0.43,
-            //     vertical: -0.43,
-            //     total: 0.63,
-            //     delta: 0.05,
-            //     speed: 23.5,
-            //     yaw: 0.34,
-            //     pitch: -0.06,
-            //     roll: -0.22,
-            //     time: "01:45",
-            // });
+            window.setInterval(function () {
+                http.open("GET", "/events-streaming");
+                http.send();
+            }, 200);
         </script>
     </body>
 </html>
