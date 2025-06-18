@@ -118,8 +118,8 @@ func (serialState *SerialState) SerialService() {
 				break
 			}
 
-			delta_t := time.Since(serialState.start_time)
-			tmp_accel, err := newAccel3D(append(data[:3], strconv.Itoa(int(delta_t))))
+			// delta_t := time.Since(serialState.start_time)
+			tmp_accel, err := newAccel3D(data[:3])
 			if err != nil {
 				serialState.logger.Err(err)
 			}
