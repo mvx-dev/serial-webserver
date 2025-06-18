@@ -294,15 +294,3 @@ func removeRot(slice []Rot3D) []Rot3D {
 	_, sliced := slice[0], slice[1:]
 	return sliced
 }
-
-func main() {
-	serialState, err := NewState(Default_serial)
-	if err != nil {
-		fmt.Printf("Failed to initialize state. Error: %s\n", err)
-	}
-
-	go serialState.SerialService()
-	fmt.Println("Service dispatched")
-	for {
-	}
-}
