@@ -93,13 +93,13 @@ func (serialState *SerialState) SerialService() {
 	for {
 		buffer := make([]byte, 128)
 		current_line := make([]byte, 0)
-		fmt.Printf("Received: ")
+		// fmt.Printf("Received: ")
 		for {
 			n, err := serialState.serialPort.Read(buffer)
 			if err != nil {
 				serialState.logger.Err(err)
 			}
-			fmt.Printf("%s", string(buffer[:n]))
+			// fmt.Printf("%s", string(buffer[:n]))
 			for i := range n {
 				current_line = append(current_line, buffer[i])
 			}

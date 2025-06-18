@@ -8,7 +8,7 @@ import (
 )
 
 func StartServer(serialState *serial.SerialState) {
-	http.HandleFunc("/data-streaming", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/events-streaming", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")

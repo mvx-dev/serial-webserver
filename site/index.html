@@ -319,38 +319,46 @@
                 return parseFloat(value);
             }
 
-            // const eventSource = new EventSource("/events-streaming");
-            // const data = new Array();
+            console.log("fuck you");
+            const eventSource = new EventSource("/events-streaming");
+            console.log("and again");
+            const data = new Array();
+            console.log("one more time");
 
-            // eventSource.onmessage = function (event) {
-            //    data = String(event.data).split(",").map(parse);
-            //    updateScreen({
-            //        forward: data[0],
-            //        side: data[1],
-            //        vertical: data[2],
-            //        total: data[3],
-            //        delta: data[4],
-            //        speed: data[5],
-            //        yaw: data[6],
-            //        pitch: data[7],
-            //        roll: data[8],
-            //        time: data[9],
-            //    });
-            //};
+            eventSource.onmessage = function (event) {
+                console.log("bastard");
+                data = event.data.split(",");
+                updateScreen({
+                    forward: parseFloat(data[0]),
+                    side: parseFloat(data[1]),
+                    vertical: parseFloat(data[2]),
+                    total: parseFloat(data[3]),
+                    delta: parseFloat(data[4]),
+                    speed: parseFloat(data[5]),
+                    yaw: parseFloat(data[6]),
+                    pitch: parseFloat(data[7]),
+                    roll: parseFloat(data[8]),
+                    time: 0,
+                });
+            };
+
+            eventSource.onerror = function () {
+                console.log("Error: connection closed or failed");
+            };
 
             // Example update
-            updateScreen({
-                forward: 0.1,
-                side: 0.43,
-                vertical: -0.43,
-                total: 0.63,
-                delta: 0.05,
-                speed: 23.5,
-                yaw: 0.34,
-                pitch: -0.06,
-                roll: -0.22,
-                time: "01:45",
-            });
+            // updateScreen({
+            //     forward: 0.1,
+            //     side: 0.43,
+            //     vertical: -0.43,
+            //     total: 0.63,
+            //     delta: 0.05,
+            //     speed: 23.5,
+            //     yaw: 0.34,
+            //     pitch: -0.06,
+            //     roll: -0.22,
+            //     time: "01:45",
+            // });
         </script>
     </body>
 </html>
