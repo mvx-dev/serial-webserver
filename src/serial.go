@@ -253,5 +253,8 @@ func main() {
 		fmt.Printf("Failed to initialize state. Error: %s\n", err)
 	}
 
-	serialState.SerialService()
+	go serialState.SerialService()
+	fmt.Println("Service dispatched")
+	for {
+	}
 }
