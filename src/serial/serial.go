@@ -31,7 +31,7 @@ type SerialState struct {
 	rolling_speed float64
 	rolling_delta float64
 	start_time    time.Time
-	Channel       chan []float64
+	Channel       chan string
 }
 
 type Accel3D struct {
@@ -83,7 +83,7 @@ func NewState(serial_port string) (*SerialState, error) {
 		rolling_speed: 0,
 		rolling_delta: 0,
 		start_time:    time.Now(),
-		Channel:       make(chan []float64),
+		Channel:       make(chan string),
 	}, nil
 }
 
@@ -153,19 +153,14 @@ func (serialState *SerialState) SerialService() {
 	}
 }
 
-func (serialState *SerialState) Format() []float64 {
-	values := make([]float64, 0)
+func (serialState *SerialState) Format() string {
 	accel := serialState.accel_data[len(serialState.accel_data)-1]
 	rot := serialState.rot_data[len(serialState.rot_data)-1]
 
-	values = append(values, accel.ToArray()...)        // Raw acceleration
-	values = append(values, accel.Abs())               // Total acceleration
-	values = append(values, serialState.rolling_delta) // Speed delta
-	values = append(values, serialState.rolling_speed) // Absolute speed
-	values = append(values, rot.ToArray()...)          // Raw rotation
-	values = append(values, float64(time.Since(serialState.start_time)))
-
-	return values
+	return fmt.Sprintf("%v,%v,%v,%v,%v,%v,%v,%v,%v,%v",
+		accel.X, accel.Y, accel.Z, accel.Abs(),
+		serialState.rolling_delta, serialState.rolling_speed,
+		rot.X, rot.Y, rot.Z, time.Since(serialState.start_time))
 }
 
 func (a *Accel3D) Print() {
